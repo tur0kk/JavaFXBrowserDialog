@@ -1,0 +1,6 @@
+# tmp files
+*~
+
+# binaries folder
+build/
+dist/
