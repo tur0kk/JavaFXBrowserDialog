@@ -1,7 +1,7 @@
 package com.tur0kk.thingiverse.fxgui;
 
 /*
- * ThingiverseLoginDialog.java
+ * BrowserLoginDialog.java
  *
  * Created on 23.12.2014, 22:55:29
  */
@@ -32,7 +32,7 @@ import static javafx.concurrent.Worker.State.FAILED;
 /**
  * @author Patrick Schmidt
  */
-public class ThingiverseLoginDialog extends javax.swing.JDialog
+public class BrowserLoginDialog extends javax.swing.JDialog
 {
   // JavaFX
   private final JFXPanel jfxPanel = new JFXPanel();
@@ -42,7 +42,7 @@ public class ThingiverseLoginDialog extends javax.swing.JDialog
   private final JPanel swingPanel = new JPanel(new BorderLayout());
   private final JLabel lblStatus = new JLabel();
   private final JProgressBar progressBar = new JProgressBar();
-
+  
   private String browserCode = null;
   
   public String getBrowserCode()
@@ -50,19 +50,19 @@ public class ThingiverseLoginDialog extends javax.swing.JDialog
     return browserCode;
   }
   
-  public ThingiverseLoginDialog(java.awt.Frame parent, boolean modal, String url)
+  public BrowserLoginDialog(java.awt.Frame parent, boolean modal, String title, String url, String redirectUrlPrefix)
   {
     super(parent, modal);
-    initComponents();
+    initComponents(title, redirectUrlPrefix);
 
     loadURL(url);
   }
 
-  private void initComponents()
+  private void initComponents(String title, String redirectUrlPrefix)
   {
     // For JavaFX/Swing interop see:
     // http://docs.oracle.com/javafx/2/swing/SimpleSwingBrowser.java.htm
-    createScene();
+    createScene(redirectUrlPrefix);
 
     progressBar.setPreferredSize(new Dimension(1000, 18));
     progressBar.setStringPainted(true);
@@ -78,15 +78,23 @@ public class ThingiverseLoginDialog extends javax.swing.JDialog
     getContentPane().add(swingPanel);
     pack();
 
-    setTitle("Thingiverse Login");
+    setTitle(title);
     setSize(1024, 600);
     setLocationRelativeTo(null);
   }
 
-  private void createScene()
+  private void createScene(String redirectUrlPrefix)
   {
     Platform.runLater(new Runnable()
     {
+      String redirectUrlPrefix_;
+      
+      public Runnable init(String redirectUrlPrefix)
+      {
+          this.redirectUrlPrefix_ = redirectUrlPrefix;
+          return this;
+      }
+        
       @Override
       public void run()
       {
@@ -130,6 +138,14 @@ public class ThingiverseLoginDialog extends javax.swing.JDialog
         // Close dialog on success
         webEngine.locationProperty().addListener(new ChangeListener<String>()
         {
+          String redirectUrlPrefix__;
+          
+          public ChangeListener init(String redirectUrlPrefix)
+          {
+              this.redirectUrlPrefix__ = redirectUrlPrefix;
+              return this;
+          }
+            
           @Override
           public void changed(ObservableValue<? extends String> ov, String oldValue, final String newValue)
           {
@@ -138,18 +154,17 @@ public class ThingiverseLoginDialog extends javax.swing.JDialog
               @Override
               public void run()
               {
-                String prefix = "http://hci.rwth-aachen.de/visicut?code=";
-                if (newValue.startsWith(prefix))
+                if (newValue.startsWith(redirectUrlPrefix__))
                 {
-                  browserCode = newValue.substring(prefix.length());
+                  browserCode = newValue.substring(redirectUrlPrefix__.length());
                   
                   // Close dialog
-                  ThingiverseLoginDialog.this.dispose();
+                  BrowserLoginDialog.this.dispose();
                 }
               }
             });
           }
-        });
+        }.init(this.redirectUrlPrefix_));
 
         // Handle exceptions
         webEngine.getLoadWorker()
@@ -180,7 +195,7 @@ public class ThingiverseLoginDialog extends javax.swing.JDialog
 
         jfxPanel.setScene(new Scene(view));
       }
-    });
+    }.init(redirectUrlPrefix));
   }
 
   private void loadURL(final String url)
