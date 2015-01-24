@@ -167,7 +167,7 @@ public class BrowserLoginDialog extends javax.swing.JDialog
                   browserCode = newValue.substring(redirectUrlPrefix__.length());
                   
                   // Close dialog
-                  BrowserLoginDialog.this.dispose();
+                  BrowserLoginDialog.this.setVisible(false);
                 }
               }
             });
