@@ -10,6 +10,8 @@ package com.tur0kk.thingiverse.fxgui;
 // This requires a recent Java version, e.g. Java 8.
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javafx.application.Platform;
@@ -99,6 +101,12 @@ public class BrowserLoginDialog extends javax.swing.JDialog
       public void run()
       {
         WebView view = new WebView();
+        
+        // Delete all cookies!
+        CookieManager manager = new CookieManager();
+        CookieHandler.setDefault(manager);
+        manager.getCookieStore().removeAll();
+        
         webEngine = view.getEngine();
 
         // Update status label
